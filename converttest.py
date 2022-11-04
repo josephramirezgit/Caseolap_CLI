@@ -1,11 +1,11 @@
-import pandas as pd
 import json
 
 class FileConversion:
     def __init__(self, input_file, output_file):
         self.input_file = input_file
         self.output_file = output_file
-    def json_to_text(self):
+
+    def json_to_txt(self):
         # open the json file
         json_file = open(self.input_file, 'r')
         json_data = json.load(json_file)
@@ -39,13 +39,45 @@ class FileConversion:
         json_file.close()
         text_file.close()
 
-def main():
-    input_file = input("Enter input file name: ")
-    output_file = input("Enter output file name: ")
+    def txt_to_json(self):
+        # open the txt file
+        text = open(self.input_file)
+        lines = text.readlines()
 
-    f = FileConversion(input_file, output_file)
-    f.json_to_text()
+        # determine keys
+        keys = {}
+        for line in lines:
+            key = line.split(":")[0]
+            if key in keys:
+                keys[key] += 1
+            else:
+                keys[key] = 1
 
-if __name__ == "__main__":
-    main()
-    print("Process completed")
+        # save res as dict to be transformed into json
+        res = {}
+
+        idx = 0
+        for k, v in keys.items():
+            # if there is more than one apperance of a key, we need to make a list of lists
+            if v > 1:
+                items = []
+                i = 0
+                while i < v:
+                    list_text = lines[idx].split(":")[1].split(" ")
+                    items.append(list_text)
+                    i += 1
+                    idx += 1
+                res[k] = items
+            else:
+                # if v = 1, then we just need to append whatever is there
+                res[k] = lines[idx].split(":")[1]
+                idx += 1
+        
+        # write to files
+        with open(self.output_file, "w") as outfile:
+            json.dump(res, outfile)
+
+        # close files
+        text.close()
+        outfile.close()
+        
